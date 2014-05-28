@@ -1,0 +1,164 @@
+#==========================================================#
+# +------------------------------------------------------+ #
+# |                     Variables 	                      | #
+# +------------------------------------------------------+ #
+#==========================================================#
+variables:
+	{points.%player%.hg} = 0
+	{deaths.%player%.hg} = 0
+	{hmobkills.%player%.hg} = 0
+	{playerkills.%player%.hg} = 0
+	{hg.anounce} = false
+#==========================================================#
+# +------------------------------------------------------+ #
+# |                    	Effects 	               | #
+# +------------------------------------------------------+ #
+#==========================================================#
+on death of player:
+	if {hg.%player%.ingame} is true:j
+		teleport player to {hg.quit}
+		set {hg.%player%.dead} to true
+		if {hg.player.slots} is 2:
+			set {hg.%player%.ingame} to false
+			set {hg.player.slots} to 0
+			set {hg.started} to false
+			set {hg.anounce} to false
+			loop all players:
+				if {hg.%loop-player%.ingame} is true:
+					broadcast "<yellow>%loop-player%<yellow> wins the Hunger Games!"
+					teleport loop-player to {hg.quit}
+					set {hg.%loop-player%.ingame} to false
+					send "&7-&8-&7-&8-&7-&8-&7-&8-&7-&8-&7-&8-&7-&8-&7-&8-&7-&8-&7-&8-&7-&8-&7-&8-&7-&8-&7-&8-&7-" to loop-player
+					send "<gold>(( )) You win a game token (( ))" to loop-player
+					send "&7-&8-&7-&8-&7-&8-&7-&8-&7-&8-&7-&8-&7-&8-&7-&8-&7-&8-&7-&8-&7-&8-&7-&8-&7-&8-&7-&8-&7-" to loop-player
+					stop		
+		if {hg.player.slots} is greater than 2:
+			remove 1 from {hg.player.slots}
+			set {hg.%player%.ingame} to false
+			set {hg.%player%.dead} to true
+			broadcast "&e[Hunger Games] %player%&e left the game %{hg.player.slots}% remain goodluck!"
+			stop
+	if {hg.%player%.waiting} is true:
+		teleport player to {hg.quit}
+		set {hg.waiting} to false
+		remove 1 from {hg.player.slots}
+on join:
+	if {hg.%player%.dead} is true:
+		set {hg.%player%.dead} to false
+		clear inventory of player
+		make console execute command "xp set %player% 0"
+		teleport player to {hg.quit}
+		heal player
+		add 10 to player's hunger bar
+		stop
+#==========================================================#
+# +------------------------------------------------------+ #
+# |                      Commands                        | #
+# +------------------------------------------------------+ #
+#==========================================================#
+command /hg <text> [<text>]:
+	description: Hunger Games commands
+	permission: zgames.op
+	usage: /hg [params]
+	trigger:
+		argument 1 is "win"
+			broadcast "<yellow>%argument 2%<yellow> wins the Hunger Games!"
+			teleport argument 2 to {hg.quit}
+			set {hg.%argument 2%.ingame} to false
+			send "&7-&8-&7-&8-&7-&8-&7-&8-&7-&8-&7-&8-&7-&8-&7-&8-&7-&8-&7-&8-&7-&8-&7-&8-&7-&8-&7-&8-&7-" to argument 2
+			send "<gold>(( )) You win a game token (( ))" to argument 2
+			send "&7-&8-&7-&8-&7-&8-&7-&8-&7-&8-&7-&8-&7-&8-&7-&8-&7-&8-&7-&8-&7-&8-&7-&8-&7-&8-&7-&8-&7-" to argument 2
+			stop
+		argument 1 is "end":
+			message "<light green>You ended the game"
+			set {hg.started} to false
+		argument 1 is "look":
+			message "<light green>Players: %{hg.player.slots}%"
+		argument 1 is "+":layer%.hg} to false
+			stop
+		argument 1 is "join":
+			if {hg.player.slots} is greater than 23:
+				message "<yellow>[Hunger Game] <light red>The game is currently full please come back later"
+				stop
+			add 1 to {hg.player.slots}
+			message "<light green>Added a fake player. There are now %{hg.player.slots}%"
+			stop
+		argument 1 is "-":
+			remove 1 from {hg.player.slots}
+			message "<light green>Removed a fake player. There are now %{hg.player.slots}%"
+			stop
+		argument 1 is "reset":
+			message "<yellow>[Hunger Games] <light green>The game was reset"
+			set {hg.anounce} to false
+			stop
+		argument 1 is "lobby":
+			set {lobby.%player%.hg} to true
+			stop
+		argument 1 is "elobby":
+			set {lobby.%p
+			if {hg.started} is true:
+				message "<light red>The game has already started please come back later"
+				teleport player to {hg.quit}
+				stop
+			set {lobby.%player%.hg} to true
+			message "&7Joining game in 5"
+			wait 1 second
+			message "&7Joining game in 4"
+			wait 1 second
+			message "&7Joining game in 3"
+			wait 1 second
+			message "&7Joining game in 2"
+			wait 1 second
+			message "&7Joining game in 1"
+			wait 1 second
+			set {hg.%player%.waiting} to true
+			message "&7You can leave the game at any time using /exit"
+			set {hg.%player%.slot} to a random integer between 1 and 24
+			if {hg.player.slots} is greater than 3:
+				add 1 to {hg.player.slots}
+				message "<yellow>[Hunger Games] &7Joining the game"
+				loop 20000 times:
+					if {hg.%player%.waiting} is true:
+						wait 1 tick
+						heal player
+						add 10 to player's hunger bar
+						teleport player to {hg.spawn.%{hg.%player%.slot}%}
+						if {hg.quited} is true:
+							stop
+						if {hg.started} is true:
+							set {hg.%player%.ingame} to true
+							set {hg.%player%.slot} to false
+							message "&e[Hunger Games]<light grey> The game has started fight to the death"
+							stop
+						if {hg.anounce} is false:
+							set {hg.anounce} to true
+							broadcast "<yellow>[Hunger Games]&7 The game will be starting in 30 seconds"
+							wait 30 seconds
+							broadcast "<yellow>[Hunger Games]&7 The game has now started"
+							set {hg.started} to true
+							set {hg.%player%.slot} to false
+							message "&e[Hunger Games]&7 The game has started fight to the death"
+							make console execute command "time day nworld"
+							stop
+			add 1 to {hg.player.slots}
+			message "<yellow>Waiting for more players"
+			loop 20000 times:
+				if {hg.%player%.waiting} is true:
+					wait 1 tick
+					heal player
+					add 10 to player's hunger bar
+					teleport player to {hg.spawn.%{hg.%player%.slot}%}
+					if {hg.quited} is true:
+						stop
+					if {hg.started} is true:
+						set {hg.%player%.ingame} to true
+						set {hg.%player%.slot} to false
+						message "&e[Hunger Games]<light grey> The game has started fight to the death."
+						stop
+			teleport player to {hg.quit}
+			remove 1 from {hg.player.slots}
+			set {hg.%player%.slot} to false
+			set {hg.%player%.ingame} to false
+			set {hg.%player%.waiting} to false
+			stop
+
