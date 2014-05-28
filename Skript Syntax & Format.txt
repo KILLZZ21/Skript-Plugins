@@ -1,0 +1,6 @@
+Let's start with this...
+
+Basic Syntax & format:
+On {activity/function}:
+[tab-key]{do command/function}
+
